@@ -82,12 +82,13 @@ router.post("/login", (req, res) => {
   const password = req.body.password;
 
   // Find User by Email
-  User.findOne({
-    email
-  }).then(user => {
+  User.findOne({ email }).then(user => {
     // Check for User
-    errors.email = "User not Found";
-    if (!user) return res.status(404).json(errors);
+
+    if (!user) {
+      errors.email = "User not Found";
+      return res.status(404).json(errors);
+    }
 
     //Check Password
     bcrypt.compare(password, user.password).then(isMatch => {
@@ -101,19 +102,9 @@ router.post("/login", (req, res) => {
         };
 
         // Sign Token
-        jwt.sign(
-          payload,
-          secret,
-          {
-            expiresIn: 7200
-          },
-          (err, token) => {
-            res.json({
-              succes: true,
-              token: "Bearer " + token
-            });
-          }
-        );
+        jwt.sign(payload, secret, { expiresIn: 7200 }, (err, token) => {
+          res.json({ succes: true, token: "Bearer " + token });
+        });
       } else {
         errors.password = "Password incorrect";
         res.status(404).json(errors);
